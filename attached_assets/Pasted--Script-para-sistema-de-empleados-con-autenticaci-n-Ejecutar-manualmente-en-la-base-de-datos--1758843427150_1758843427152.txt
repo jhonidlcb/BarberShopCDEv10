@@ -1,0 +1,46 @@
+-- Script para sistema de empleados con autenticación
+-- Ejecutar manualmente en la base de datos
+
+-- 1. Crear tabla de empleados con autenticación
+CREATE TABLE IF NOT EXISTS employee_users (
+    id VARCHAR DEFAULT gen_random_uuid() PRIMARY KEY,
+    staff_member_id VARCHAR REFERENCES staff_members(id) ON DELETE CASCADE,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT true,
+    can_login BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+-- 2. Crear tabla de sesiones de empleados
+CREATE TABLE IF NOT EXISTS employee_sessions (
+    id VARCHAR DEFAULT gen_random_uuid() PRIMARY KEY,
+    employee_id VARCHAR NOT NULL REFERENCES employee_users(id) ON DELETE CASCADE,
+    token TEXT NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+-- 3. Agregar columna para asignar empleado a citas
+ALTER TABLE appointments 
+ADD COLUMN IF NOT EXISTS attended_by_employee_id VARCHAR REFERENCES employee_users(id);
+
+-- 4. Crear tabla de estadísticas de empleados
+CREATE TABLE IF NOT EXISTS employee_stats (
+    id VARCHAR DEFAULT gen_random_uuid() PRIMARY KEY,
+    employee_id VARCHAR NOT NULL REFERENCES employee_users(id) ON DELETE CASCADE,
+    month_year VARCHAR(7) NOT NULL, -- Format: YYYY-MM
+    total_appointments INTEGER DEFAULT 0,
+    completed_appointments INTEGER DEFAULT 0,
+    total_revenue NUMERIC(12,2) DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP NOT NULL DEFAULT now(),
+    UNIQUE(employee_id, month_year)
+);
+
+-- 5. Crear índices para mejor rendimiento
+CREATE INDEX IF NOT EXISTS idx_appointments_employee ON appointments(attended_by_employee_id);
+CREATE INDEX IF NOT EXISTS idx_employee_sessions_token ON employee_sessions(token);
+CREATE INDEX IF NOT EXISTS idx_employee_stats_employee_month ON employee_stats(employee_id, month_year);

@@ -1,0 +1,76 @@
+-- Script SQL para agregar soporte multiidioma y multimoneda
+-- Ejecutar manualmente en la base de datos
+
+-- 1. Agregar columnas multiidioma a la tabla services
+ALTER TABLE services 
+ADD COLUMN name_es TEXT,
+ADD COLUMN name_pt TEXT, 
+ADD COLUMN description_es TEXT,
+ADD COLUMN description_pt TEXT,
+ADD COLUMN price_usd DECIMAL(10,2),
+ADD COLUMN price_brl DECIMAL(10,2),
+ADD COLUMN price_pyg DECIMAL(12,2);
+
+-- 2. Agregar columnas multiidioma a la tabla blog_posts
+ALTER TABLE blog_posts
+ADD COLUMN title_es TEXT,
+ADD COLUMN title_pt TEXT,
+ADD COLUMN content_es TEXT,
+ADD COLUMN content_pt TEXT,
+ADD COLUMN excerpt_es TEXT,
+ADD COLUMN excerpt_pt TEXT;
+
+-- 3. Agregar columnas multiidioma a la tabla gallery_images
+ALTER TABLE gallery_images
+ADD COLUMN title_es TEXT,
+ADD COLUMN title_pt TEXT,
+ADD COLUMN description_es TEXT,
+ADD COLUMN description_pt TEXT;
+
+-- 4. Agregar columnas multiidioma a la tabla company_info
+ALTER TABLE company_info
+ADD COLUMN content_es TEXT,
+ADD COLUMN content_pt TEXT;
+
+-- 5. Crear tabla para configuración de monedas
+CREATE TABLE IF NOT EXISTS currency_settings (
+    id SERIAL PRIMARY KEY,
+    currency_code VARCHAR(3) NOT NULL UNIQUE,
+    currency_name VARCHAR(50) NOT NULL,
+    currency_symbol VARCHAR(10) NOT NULL,
+    exchange_rate_to_usd DECIMAL(10,6) DEFAULT 1.0,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 6. Insertar configuraciones de moneda por defecto
+INSERT INTO currency_settings (currency_code, currency_name, currency_symbol, exchange_rate_to_usd) VALUES
+('USD', 'Dólar Estadounidense', '$', 1.0),
+('BRL', 'Real Brasileño', 'R$', 5.5),
+('PYG', 'Guaraní Paraguayo', '₲', 7300.0)
+ON CONFLICT (currency_code) DO NOTHING;
+
+-- 7. Crear tabla para configuración de idiomas
+CREATE TABLE IF NOT EXISTS language_settings (
+    id SERIAL PRIMARY KEY,
+    language_code VARCHAR(2) NOT NULL UNIQUE,
+    language_name VARCHAR(50) NOT NULL,
+    is_default BOOLEAN DEFAULT false,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 8. Insertar configuraciones de idioma por defecto
+INSERT INTO language_settings (language_code, language_name, is_default, is_active) VALUES
+('es', 'Español', true, true),
+('pt', 'Português', false, true)
+ON CONFLICT (language_code) DO NOTHING;
+
+-- 9. Crear usuario admin por defecto si no existe
+INSERT INTO admin_users (username, email, password, role, active)
+VALUES ('admin', 'admin@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'super_admin', true)
+ON CONFLICT (username) DO NOTHING;
+-- Contraseña por defecto: 'password' (cambiar después del primer login)
+
+COMMIT;

@@ -1,0 +1,45 @@
+
+neondb=> -- Script para agregar tablas de configuración multimoneda y multiidioma
+
+-- Tabla de configuración de monedas
+CREATE TABLE currency_settings (
+  id SERIAL PRIMARY KEY,
+  currency_code VARCHAR(3) NOT NULL UNIQUE,
+  currency_name VARCHAR(50) NOT NULL,
+  currency_symbol VARCHAR(10) NOT NULL,
+  exchange_rate_to_usd NUMERIC(10,6) DEFAULT 1.0,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Tabla de configuración de idiomas
+CREATE TABLE language_settings (
+  id SERIAL PRIMARY KEY,
+  language_code VARCHAR(2) NOT NULL UNIQUE,
+  language_name VARCHAR(50) NOT NULL,
+  is_default BOOLEAN NOT NULL DEFAULT false,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+ADD COLUMN IF NOT EXISTS content_es TEXT;_info si no existen  s_default) VALUESx
+SSL connection has been closed unexpectedly
+The connection to the server was lost. Attempting reset: Succeeded.
+psql (17.6 (Ubuntu 17.6-1.pgdg22.04+1), server 17.5 (84bec44))
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, compression: off, ALPN: postgresql)
+ERROR:  relation "language_settings" already exists
+ERROR:  duplicate key value violates unique constraint "currency_settings_currency_code_key"
+DETAIL:  Key (currency_code)=(USD) already exists.
+ERROR:  duplicate key value violates unique constraint "language_settings_language_code_key"
+DETAIL:  Key (language_code)=(es) already exists.
+NOTICE:  column "price_usd" of relation "services" already exists, skipping
+NOTICE:  column "price_brl" of relation "services" already exists, skipping
+NOTICE:  column "price_pyg" of relation "services" already exists, skipping
+ALTER TABLE
+UPDATE 0
+NOTICE:  column "title_es" of relation "blog_posts" already exists, skipping
+NOTICE:  column "content_es" of relation "blog_posts" already exists, skipping
+NOTICE:  column "excerpt_es" of relation "blog_posts" already exists, skipping
+ALTER TABLE
+NOTICE:  column "content_es" of relation "company_info" already exists, skipping
+ALTER TABLE
+neondb=>

@@ -1,0 +1,140 @@
+root@server1:~# psql 'postgresql://neondb_owner:npg_3n6SRzNgmWaI@ep-still-term-a                                                                                                 cjgon5c-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=re                                                                                                 quire'
+psql (14.19 (Ubuntu 14.19-0ubuntu0.22.04.1), server 17.5 (84bec44))
+WARNING: psql major version 14, server major version 17.
+         Some psql features might not work.
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, co                                                                                                 mpression: off)
+Type "help" for help.
+
+neondb=> -- Crear tabla users
+CREATE TABLE users (
+  id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+  username TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL
+);
+
+-- Crear tabla appointments
+CREATE TABLE appointments (
+  id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  customer_email TEXT,
+  service_type TEXT NOT NULL,
+  appointment_date DATE NOT NULL,
+  appointment_time TIME NOT NULL,
+  notes TEXT,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  CONSTRAINT unique_slot UNIQUE (appointment_date, appointment_time),
+  CONSTRAINT status_check CHECK (status IN ('pending', 'confirmed', 'completed',                                                                                                  'cancelled'))
+);
+
+);CONSTRAINT rating_check CHECK (rating >= 1 AND rating <= 5)'beard-care', 'styl
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+neondb=> -- Verificar que las tablas fueron creadas
+SELECT tablename FROM pg_tables WHERE schemaname = 'public';
+
+-- Verificar estructura de cada tabla
+\d users
+\d appointments
+\d blog_posts
+\d reviews
+
+-- Verificar constraints
+SELECT conname, contype FROM pg_constraint
+WHERE conrelid = 'appointments'::regclass;
+  tablename
+--------------
+ users
+ appointments
+ blog_posts
+ reviews
+(4 rows)
+
+                          Table "public.users"
+  Column  |       Type        | Collation | Nullable |      Default
+----------+-------------------+-----------+----------+-------------------
+ id       | character varying |           | not null | gen_random_uuid()
+ username | text              |           | not null |
+ password | text              |           | not null |
+Indexes:
+    "users_pkey" PRIMARY KEY, btree (id)
+    "users_username_key" UNIQUE CONSTRAINT, btree (username)
+
+                              Table "public.blog_posts"
+   Column   |            Type             | Collation | Nullable |      Default
+------------+-----------------------------+-----------+----------+-------------------
+ id         | character varying           |           | not null | gen_random_uuid()
+ title      | text                        |           | not null |
+ title_pt   | text                        |           | not null |
+ slug       | text                        |           | not null |
+ content    | text                        |           | not null |
+ content_pt | text                        |           | not null |
+ excerpt    | text                        |           | not null |
+ excerpt_pt | text                        |           | not null |
+ category   | text                        |           | not null |
+ image_url  | text                        |           |          |
+ published  | boolean                     |           | not null | false
+ created_at | timestamp without time zone |           | not null | now()
+ updated_at | timestamp without time zone |           | not null | now()
+Indexes:
+    "blog_posts_pkey" PRIMARY KEY, btree (id)
+    "blog_posts_slug_key" UNIQUE CONSTRAINT, btree (slug)
+Check constraints:
+    "category_check" CHECK (category = ANY (ARRAY['hair-care'::text, 'beard-care'::text, 'styling-tips'::text]))
+
+q                                 Table "public.reviews"
+    Column     |            Type             | Collation | Nullable |      Default
+---------------+-----------------------------+-----------+----------+-------------------
+ id            | character varying           |           | not null | gen_random_uuid()
+ customer_name | text                        |           | not null |
+ rating        | integer                     |           | not null |
+ comment       | text                        |           | not null |
+ service_type  | text                        |           |          |
+ approved      | boolean                     |           | not null | false
+ created_at    | timestamp without time zone |           | not null | now()
+Indexes:
+    "reviews_pkey" PRIMARY KEY, btree (id)
+Check constraints:
+    "rating_check" CHECK (rating >= 1 AND rating <= 5)
+
+\d: extra argument "--" ignored
+\d: extra argument "Verificar" ignored
+\d: extra argument "constraints" ignored
+\d: extra argument "SELECT" ignored
+\d: extra argument "conname," ignored
+\d: extra argument "contype" ignored
+\d: extra argument "FROM" ignored
+\d: extra argument "pg_constraint" ignored
+\d: extra argument "WHERE" ignored
+\d: extra argument "conrelid" ignored
+\d: extra argument "=" ignored
+\d: extra argument "appointments::regclass;" ignored
+neondb=> -- Insertar datos de prueba en appointments
+INSERT INTO appointments (customer_name, customer_phone, customer_email, service_type, appointment_date, appointment_time, status)
+VALUES
+  ('Juan Pérez', '+1234567890', 'juan@example.com', 'corte-cabello', '2024-01-15', '10:00', 'confirmed'),
+  ('María García', '+1234567891', 'maria@example.com', 'barba', '2024-01-15', '11:00', 'pending');
+
+-- Insertar datos de prueba en reviews
+INSERT INTO reviews (customer_name, rating, comment, service_type, approved)
+VALUES
+  ('Carlos López', 5, 'Excelente servicio, muy profesional', 'corte-cabello', true),
+  ('Ana Martín', 4, 'Muy buena atención, recomendado', 'barba', true);
+
+-- Insertar datos de prueba en blog_posts
+INSERT INTO blog_posts (title, title_pt, slug, content, content_pt, excerpt, excerpt_pt, category, published)
+VALUES
+  ('Cuidado del Cabello', 'Cuidado do Cabelo', 'cuidado-cabello', 'Contenido completo...', 'Conteúdo completo...', 'Extracto...', 'Extrato...', 'hair-care', true);
+INSERT 0 2
+INSERT 0 2
+INSERT 0 1
+neondb=> SELECT current_database(), current_user;
+ current_database | current_user
+------------------+--------------
+ neondb           | neondb_owner
+(1 row)
+
+neondb=>

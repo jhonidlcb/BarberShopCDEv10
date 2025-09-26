@@ -1,0 +1,88 @@
+root@server1:/www/wwwroot/barbershop.softwarepar.lat# psql 'postgresql://neondb_owner:npg_3n6SRzNgmWaI@ep-still-term-acjgon5c-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+psql (17.6 (Ubuntu 17.6-1.pgdg22.04+1), server 17.5 (84bec44))
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, compression: off, ALPN: postgresql)
+Type "help" for help.
+
+neondb=> -- Agregar columnas de multimoneda a la tabla services
+ALTER TABLE services
+ADD COLUMN IF NOT EXISTS price_usd NUMERIC(10,2),
+ADD COLUMN IF NOT EXISTS price_brl NUMERIC(10,2),
+ADD COLUMN IF NOT EXISTS price_pyg NUMERIC(12,0),
+ADD COLUMN IF NOT EXISTS is_popular BOOLEAN DEFAULT false;
+
+-- Migrar datos existentes (asumiendo que el precio actual está en USD)
+UPDATE services
+SET
+  price_usd = price,
+  price_brl = price * 5.5,  -- Aproximación 1 USD = 5.5 BRL
+  price_pyg = price * 7300, -- Aproximación 1 USD = 7300 PYG
+  is_popular = false
+WHERE price_usd IS NULL;
+
+-- Eliminar la columna price antigua (opcional, después de verificar que todo funciona)
+-- ALTER TABLE services DROP COLUMN IF EXISTS price;
+
+-- Crear usuario admin por defecto (cambiar la contraseña después)
+INSERT INTO admin_users (username, email, password, role, active)
+VALUES ('admin', 'admin@barberia.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', true)
+WHERE table_name = 'services' ORDER BY ordinal_position;lumns AMENTE
+ALTER TABLE
+UPDATE 12
+INSERT 0 0
+   column_name    |          data_type
+------------------+-----------------------------
+ id               | character varying
+ name             | text
+ name_pt          | text
+ description      | text
+ description_pt   | text
+ price            | numeric
+ duration_minutes | integer
+ image_url        | text
+ active           | boolean
+ sort_order       | integer
+ created_at       | timestamp without time zone
+ updated_at       | timestamp without time zone
+ price_usd        | numeric
+ price_brl        | numeric
+ price_pyg        | numeric
+ is_popular       | boolean
+(16 rows)
+
+neondb=> -- Script SQL para agregar soporte multiidioma y multimoneda
+-- Ejecutar manualmente en la base de datos
+
+-- 1. Agregar columnas multiidioma a la tabla services
+ALTER TABLE services
+ADD COLUMN name_es TEXT,
+ADD COLUMN name_pt TEXT,
+ADD COLUMN description_es TEXT,
+ADD COLUMN description_pt TEXT,
+ADD COLUMN price_usd DECIMAL(10,2),
+ADD COLUMN price_brl DECIMAL(10,2),
+ADD COLUMN price_pyg DECIMAL(12,2);
+
+-- 2. Agregar columnas multiidioma a la tabla blog_posts
+ALTER TABLE blog_posts
+ADD COLUMN title_es TEXT,
+ADD COLUMN title_pt TEXT,
+ADD COLUMN content_es TEXT,
+ADD COLUMN content_pt TEXT,
+ADD COLUMN excerpt_es TEXT,
+ADD COLUMN excerpt_pt TEXT;
+
+-- 3. Agregar columnas multiidioma a la tabla gallery_images
+ALTER TABLE gallery_images
+COMMIT;raseña por defecto: 'password' (cambiar después del primer login)Ea3Ro9ll
+ERROR:  column "name_pt" of relation "services" already exists
+ERROR:  column "title_pt" of relation "blog_posts" already exists
+ERROR:  column "title_pt" of relation "gallery_images" already exists
+ERROR:  column "content_pt" of relation "company_info" already exists
+CREATE TABLE
+INSERT 0 3
+CREATE TABLE
+INSERT 0 2
+INSERT 0 0
+WARNING:  there is no transaction in progress
+COMMIT
+neondb=>
